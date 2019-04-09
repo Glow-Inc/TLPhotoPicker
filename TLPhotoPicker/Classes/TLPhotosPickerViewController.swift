@@ -81,9 +81,10 @@ public struct TLPhotosPickerConfigure {
     public var cameraCellNibSet: (nibName: String, bundle:Bundle)? = nil
     public var fetchCollectionTypes: [(PHAssetCollectionType,PHAssetCollectionSubtype)]? = nil
     public var groupByFetch: PHFetchedResultGroupedBy? = nil
-    public init() {
-        
-    }
+    
+    // Lawrence added
+    public var activeCamera: Bool = false
+    public init() {}
 }
 
 
@@ -166,6 +167,9 @@ open class TLPhotosPickerViewController: UIViewController {
     private var placeholderThumbnail: UIImage? = nil
     private var cameraImage: UIImage? = nil
     
+    // Lawrence added
+    private var cameraActivedOnce: Bool = false
+    
     deinit {
         //print("deinit TLPhotosPickerViewController")
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
@@ -242,6 +246,14 @@ open class TLPhotosPickerViewController: UIViewController {
         super.viewWillAppear(animated)
         if self.photoLibrary.delegate == nil {
             initPhotoLibrary()
+        }
+    }
+    
+    open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if configure.activeCamera, !cameraActivedOnce {
+            showCameraIfAuthorized()
+            cameraActivedOnce = true
         }
     }
     
@@ -527,7 +539,7 @@ extension TLPhotosPickerViewController: UIImagePickerControllerDelegate, UINavig
         }
         picker.allowsEditing = false
         picker.delegate = self
-        self.present(picker, animated: true, completion: nil)
+        self.present(picker, animated: cameraActivedOnce, completion: nil)
     }
 
     private func handleDeniedAlbumsAuthorization() {

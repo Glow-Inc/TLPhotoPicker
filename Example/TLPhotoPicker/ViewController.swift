@@ -93,6 +93,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         var configure = TLPhotosPickerConfigure()
         configure.numberOfColumn = 3
         configure.groupByFetch = .day
+        configure.activeCamera = true
         viewController.configure = configure
         viewController.selectedAssets = self.selectedAssets
         viewController.logDelegate = self
