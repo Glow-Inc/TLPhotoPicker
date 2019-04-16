@@ -142,7 +142,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
                 print(image)
                 self.label.text = "local storage image"
                 self.imageView.image = image
-            }else {
+            } else {
                 print("Can't get image at local storage, try download image")
                 asset.cloudImageDownload(progressBlock: { [weak self] (progress) in
                     DispatchQueue.main.async {

@@ -6,6 +6,8 @@
 //  Copyright © 2017년 wade.hawk. All rights reserved.
 //
 
+//swiftlint:disable force_cast
+
 import UIKit
 import PhotosUI
 
@@ -70,7 +72,7 @@ open class TLPhotoCollectionViewCell: UICollectionViewCell {
                 if let observer = self.observer {
                     NotificationCenter.default.removeObserver(observer)
                 }
-            }else {
+            } else {
                 self.playerView?.playerLayer.player = self.player
                 self.observer = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: self.player?.currentItem, queue: nil, using: { [weak self] (_) in
                     DispatchQueue.main.async {
@@ -111,11 +113,11 @@ open class TLPhotoCollectionViewCell: UICollectionViewCell {
     @objc open func popScaleAnim() {
         UIView.animate(withDuration: 0.1, animations: {
             self.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
-        }) { _ in
+        }, completion: { _ in
             UIView.animate(withDuration: 0.1, animations: {
                 self.transform = CGAffineTransform(scaleX: 1, y: 1)
             })
-        }
+        })
     }
     
     @objc open func update(with phAsset: PHAsset) {
@@ -177,3 +179,4 @@ open class TLPhotoCollectionViewCell: UICollectionViewCell {
         self.selectedAsset = false
     }
 }
+//swiftlint:enable force_cast

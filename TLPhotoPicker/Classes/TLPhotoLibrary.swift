@@ -16,7 +16,7 @@ protocol TLPhotoLibraryDelegate: class {
 
 class TLPhotoLibrary {
     
-    weak var delegate: TLPhotoLibraryDelegate? = nil
+    weak var delegate: TLPhotoLibraryDelegate?
     
     lazy var imageManager: PHCachingImageManager = {
         return PHCachingImageManager()
@@ -27,7 +27,7 @@ class TLPhotoLibrary {
     }
     
     @discardableResult
-    func livePhotoAsset(asset: PHAsset, size: CGSize = CGSize(width: 720, height: 1280), progressBlock: Photos.PHAssetImageProgressHandler? = nil, completionBlock:@escaping (PHLivePhoto,Bool)-> Void ) -> PHImageRequestID {
+    func livePhotoAsset(asset: PHAsset, size: CGSize = CGSize(width: 720, height: 1280), progressBlock: Photos.PHAssetImageProgressHandler? = nil, completionBlock:@escaping (PHLivePhoto,Bool) -> Void ) -> PHImageRequestID {
         let options = PHLivePhotoRequestOptions()
         options.deliveryMode = .opportunistic
         options.isNetworkAccessAllowed = true
@@ -37,7 +37,7 @@ class TLPhotoLibrary {
         let requestID = self.imageManager.requestLivePhoto(for: asset, targetSize: targetSize, contentMode: .aspectFill, options: options) { (livePhoto, info) in
             let complete = (info?["PHImageResultIsDegradedKey"] as? Bool) == false
             if let livePhoto = livePhoto {
-                completionBlock(livePhoto,complete)
+                completionBlock(livePhoto, complete)
             }
         }
         return requestID
@@ -50,13 +50,13 @@ class TLPhotoLibrary {
         options.deliveryMode = .automatic
         options.progressHandler = progressBlock
         let requestID = self.imageManager.requestPlayerItem(forVideo: asset, options: options, resultHandler: { playerItem, info in
-            completionBlock(playerItem,info)
+            completionBlock(playerItem, info)
         })
         return requestID
     }
     
     @discardableResult
-    func imageAsset(asset: PHAsset, size: CGSize = CGSize(width: 160, height: 160), options: PHImageRequestOptions? = nil, completionBlock:@escaping (UIImage,Bool)-> Void ) -> PHImageRequestID {
+    func imageAsset(asset: PHAsset, size: CGSize = CGSize(width: 160, height: 160), options: PHImageRequestOptions? = nil, completionBlock:@escaping (UIImage, Bool) -> Void ) -> PHImageRequestID {
         var options = options
         if options == nil {
             options = PHImageRequestOptions()
@@ -65,12 +65,12 @@ class TLPhotoLibrary {
             options?.deliveryMode = .opportunistic
             options?.isNetworkAccessAllowed = true
         }
-        let scale = min(UIScreen.main.scale,2)
+        let scale = min(UIScreen.main.scale, 2)
         let targetSize = CGSize(width: size.width*scale, height: size.height*scale)
         let requestID = self.imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFill, options: options) { image, info in
             let complete = (info?["PHImageResultIsDegradedKey"] as? Bool) == false
             if let image = image {
-                completionBlock(image,complete)
+                completionBlock(image, complete)
             }
         }
         return requestID
@@ -116,19 +116,33 @@ class TLPhotoLibrary {
         }
         return image
     }
+    
+    @discardableResult
+    class func image(for asset: PHAsset, size: CGSize) -> UIImage? {
+        let options = PHImageRequestOptions()
+        options.isSynchronous = true
+        options.resizeMode = .none
+        options.isNetworkAccessAllowed = false
+        options.version = .current
+        var image: UIImage? = nil
+        _ = PHCachingImageManager().requestImage(for: asset, targetSize: size, contentMode: .aspectFit, options: options, resultHandler: { (imageData, info) in
+            image = imageData
+        })
+        return image
+    }
 }
 
 extension PHFetchOptions {
     func merge(predicate: NSPredicate) {
         if let storePredicate = self.predicate {
             self.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [storePredicate, predicate])
-        }else {
+        } else {
             self.predicate = predicate
         }
     }
 }
 
-//MARK: - Load Collection
+// MARK: - Load Collection
 extension TLPhotoLibrary {
     func getOption(configure: TLPhotosPickerConfigure) -> PHFetchOptions {
         
@@ -196,13 +210,13 @@ extension TLPhotoLibrary {
             }
             return nil
         }
-        if let fetchCollectionTypes: [(PHAssetCollectionType,PHAssetCollectionSubtype)] = configure.fetchCollectionTypes {
+        if let fetchCollectionTypes: [(PHAssetCollectionType, PHAssetCollectionSubtype)] = configure.fetchCollectionTypes {
             DispatchQueue.global(qos: .userInteractive).async { [weak self] in
                 var assetCollections = [TLAssetsCollection]()
-                for (type,subType) in fetchCollectionTypes {
+                for (type, subType) in fetchCollectionTypes {
                     if type == .smartAlbum {
                         getSmartAlbum(subType: subType, result: &assetCollections)
-                    }else {
+                    } else {
                         getAlbum(subType: subType, result: &assetCollections)
                     }
                 }
@@ -210,7 +224,7 @@ extension TLPhotoLibrary {
                     self?.delegate?.loadCompleteAllCollection(collections: assetCollections)
                 }
             }
-        }else {
+        } else {
             DispatchQueue.global(qos: .userInteractive).async { [weak self] in
                 var assetCollections = [TLAssetsCollection]()
                 //Camera Roll
@@ -254,4 +268,3 @@ extension TLPhotoLibrary {
         }
     }
 }
-

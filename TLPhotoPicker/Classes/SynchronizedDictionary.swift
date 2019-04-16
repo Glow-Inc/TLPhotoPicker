@@ -7,8 +7,8 @@
 
 import Foundation
 
-public class SynchronizedDictionary<K:Hashable,V> {
-    private var dictionary: [K:V] = [:]
+public class SynchronizedDictionary<K: Hashable, V> {
+    private var dictionary: [K: V] = [:]
     private let accessQueue = DispatchQueue(label: "SynchronizedDictionaryAccess",
                                             attributes: .concurrent)
     
@@ -28,7 +28,7 @@ public class SynchronizedDictionary<K:Hashable,V> {
         }
     }
     
-    public func forEach(_ closure: ((K,V) -> Void)) {
+    public func forEach(_ closure: ((K, V) -> Void)) {
         self.accessQueue.sync {
             self.dictionary.forEach{ arg in
                 let (key, value) = arg
