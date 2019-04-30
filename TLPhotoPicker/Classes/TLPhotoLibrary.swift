@@ -81,21 +81,21 @@ class TLPhotoLibrary {
     }
     
     @discardableResult
-    class func cloudImageDownload(asset: PHAsset, size: CGSize = PHImageManagerMaximumSize, progressBlock: @escaping (Double) -> Void, completionBlock:@escaping (UIImage?)-> Void ) -> PHImageRequestID {
+    class func cloudImageDownload(asset: PHAsset, size: CGSize = PHImageManagerMaximumSize, synchronous: Bool = false, progressBlock: @escaping (Double) -> Void, completionBlock: @escaping (UIImage?) -> Void) -> PHImageRequestID {
         let options = PHImageRequestOptions()
-        options.isSynchronous = false
+        options.isSynchronous = synchronous
         options.isNetworkAccessAllowed = true
         options.deliveryMode = .opportunistic
         options.version = .current
         options.resizeMode = .exact
-        options.progressHandler = { (progress,error,stop,info) in
+        options.progressHandler = { progress, error, stop, info in
             progressBlock(progress)
         }
         let requestID = PHCachingImageManager().requestImageData(for: asset, options: options) { (imageData, dataUTI, orientation, info) in
-            if let data = imageData,let _ = info {
+            if let data = imageData, let _ = info {
                 completionBlock(UIImage(data: data))
-            }else{
-                completionBlock(nil)//error
+            } else {
+                completionBlock(nil) // error
             }
         }
         return requestID

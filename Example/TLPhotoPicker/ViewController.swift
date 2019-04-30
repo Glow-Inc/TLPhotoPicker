@@ -10,11 +10,29 @@ import UIKit
 import TLPhotoPicker
 import Photos
 
+private struct StyleGuide {
+    let primaryColor = UIColor(red: 11/255, green: 36/255, blue: 251/255, alpha: 1)
+    let progressColor = UIColor.white
+    let buttonColor = UIColor.red
+}
+
 class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
     
     var selectedAssets = [TLPHAsset]()
     @IBOutlet var label: UILabel!
     @IBOutlet var imageView: UIImageView!
+    
+    private let styleGuide = StyleGuide()
+    private lazy var progressView: ProgressView = {
+        let progressView = ProgressView()
+        progressView.fullProgressAnimationDuration = 3
+        progressView.progressInset = .init(top: 8, left: 8, bottom: 8, right: 8)
+        progressView.layer.borderColor = styleGuide.progressColor.cgColor
+        progressView.trackColor = styleGuide.primaryColor
+        progressView.progressColor = styleGuide.progressColor
+        progressView.separatorColor = styleGuide.primaryColor
+        return progressView
+    }()
     
     @IBAction func pickerButtonTap() {
         let viewController = CustomPhotoPickerViewController()
@@ -23,6 +41,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
             self?.showExceededMaximumAlert(vc: picker)
         }
         var configure = TLPhotosPickerConfigure()
+        configure.usedPrefetch = true
         configure.numberOfColumn = 3
         viewController.configure = configure
         viewController.selectedAssets = self.selectedAssets
@@ -93,7 +112,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         var configure = TLPhotosPickerConfigure()
         configure.numberOfColumn = 3
         configure.groupByFetch = .day
-        configure.activeCamera = true
+        configure.activeCamera = false
         viewController.configure = configure
         viewController.selectedAssets = self.selectedAssets
         viewController.logDelegate = self
@@ -101,11 +120,26 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
     }
     
     func dismissPhotoPicker(withTLPHAssets: [TLPHAsset]) {
+        progressView.numberOfSteps = UInt(withTLPHAssets.count)
+        progressView.progress = 0.0
+        let totalWidth = view.bounds.width
+        let totalHeight = view.bounds.height
+        let width = view.bounds.width-64
+        progressView.frame = CGRect(x: (totalWidth-width)/2, y: (totalHeight-50)/2, width: width, height: 50)
+        view.addSubview(progressView)
+        
         // use selected order, fullresolution image
         self.selectedAssets = withTLPHAssets
-        getFirstSelectedImage()
+//        getFirstSelectedImage()
         //iCloud or video
 //        getAsyncCopyTemporaryFile()
+        download(with: withTLPHAssets) { images in
+            print(images)
+            DispatchQueue.main.async {
+                self.imageView.image = images.last
+                self.progressView.removeFromSuperview()
+            }
+        }
     }
     
     func exportVideo() {
@@ -130,6 +164,41 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         }
     }
     
+    func download(with assets: [TLPHAsset], continueBlock: @escaping ([UIImage]) -> Void) {
+        print("[TEST] Can't get image at local storage, try download image")
+        let total = Double(assets.count)
+        DispatchQueue.global(qos: .userInitiated).async {
+            var images: [UIImage] = []
+            var completed: Double = 0
+            var failed = 0
+            
+            var index = -1
+            for asset in assets {
+                index += 1
+                asset.cloudImageDownload(size: CGSize(width: 3000, height: 3000), synchronous: true, progressBlock: { [weak self] progress in
+//                    let remaining = Double(max(1, total-completed))
+                    let completed = completed/total
+                    let result = Float(progress/total + completed)
+                    DispatchQueue.main.async {
+                        print("current progress: \(result)")
+                        self?.progressView.animateProgress(to: result)
+                    }
+                }, completionBlock: { image in
+                    completed += 1
+                    if let image = image {
+                        images.append(image)
+                    } else {
+                        failed += 1
+                    }
+                })
+                print("finished \(index) round")
+            }
+            
+            print("downloaded: \(images.count), failed: \(failed), total: \(total)")
+            continueBlock(images)
+        }
+    }
+    
     func getFirstSelectedImage() {
         if let asset = self.selectedAssets.first {
             if asset.type == .video {
@@ -143,21 +212,21 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
                 self.label.text = "local storage image"
                 self.imageView.image = image
             } else {
-                print("Can't get image at local storage, try download image")
-                asset.cloudImageDownload(progressBlock: { [weak self] (progress) in
-                    DispatchQueue.main.async {
-                        self?.label.text = "download \(100*progress)%"
-                        print(progress)
-                    }
-                }, completionBlock: { [weak self] (image) in
-                    if let image = image {
-                        //use image
-                        DispatchQueue.main.async {
-                            self?.label.text = "complete download"
-                            self?.imageView.image = image
-                        }
-                    }
-                })
+//                print("Can't get image at local storage, try download image")
+//                asset.cloudImageDownload(progressBlock: { [weak self] (progress) in
+//                    DispatchQueue.main.async {
+//                        self?.label.text = "download \(100*progress)%"
+//                        print(progress)
+//                    }
+//                }, completionBlock: { [weak self] (image) in
+//                    if let image = image {
+//                        //use image
+//                        DispatchQueue.main.async {
+//                            self?.label.text = "complete download"
+//                            self?.imageView.image = image
+//                        }
+//                    }
+//                })
             }
         }
     }

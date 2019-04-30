@@ -59,9 +59,9 @@ public struct TLPHAsset {
     }
     
     @discardableResult
-    public func cloudImageDownload(progressBlock: @escaping (Double) -> Void, completionBlock: @escaping (UIImage?) -> Void ) -> PHImageRequestID? {
+    public func cloudImageDownload(size: CGSize, synchronous: Bool = false, progressBlock: @escaping (Double) -> Void, completionBlock: @escaping (UIImage?) -> Void) -> PHImageRequestID? {
         guard let phAsset = self.phAsset else { return nil }
-        return TLPhotoLibrary.cloudImageDownload(asset: phAsset, progressBlock: progressBlock, completionBlock: completionBlock)
+        return TLPhotoLibrary.cloudImageDownload(asset: phAsset, size: size, synchronous: synchronous, progressBlock: progressBlock, completionBlock: completionBlock)
     }
     
     public var originalFileName: String? {

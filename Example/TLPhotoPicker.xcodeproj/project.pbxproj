@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0247636422785A6E006E7B63 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0247636322785A6E006E7B63 /* ProgressView.swift */; };
 		18F9901721F5FB6400BD192E /* CustomHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 18F9901621F5FB6400BD192E /* CustomHeaderView.xib */; };
 		18F9901921F5FB7000BD192E /* CustomHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F9901821F5FB7000BD192E /* CustomHeaderView.swift */; };
 		18F9901B21F603A900BD192E /* CustomDataSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F9901A21F603A900BD192E /* CustomDataSources.swift */; };
@@ -32,6 +33,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0247636322785A6E006E7B63 /* ProgressView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 		18A9D0696DEEBAAB25DE043D /* Pods_TLPhotoPicker_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TLPhotoPicker_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		18F9901621F5FB6400BD192E /* CustomHeaderView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CustomHeaderView.xib; sourceTree = "<group>"; };
 		18F9901821F5FB7000BD192E /* CustomHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomHeaderView.swift; sourceTree = "<group>"; };
@@ -136,6 +138,7 @@
 				5D5573681EDA610800E5F509 /* CustomPhotoPicker */,
 				5D438D811EC9DB7E00D63583 /* CustomCells */,
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
+				0247636322785A6E006E7B63 /* ProgressView.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				607FACD91AFB9204008FA782 /* Main.storyboard */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
@@ -331,6 +334,7 @@
 				18F9901B21F603A900BD192E /* CustomDataSources.swift in Sources */,
 				5D34B3141F2639CA00F22369 /* PhotoPickerWithNavigationViewController.swift in Sources */,
 				18F9901921F5FB7000BD192E /* CustomHeaderView.swift in Sources */,
+				0247636422785A6E006E7B63 /* ProgressView.swift in Sources */,
 				5DCDB0FE1FA9B35F00B8F92C /* PhotoCaptureDelegate.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
