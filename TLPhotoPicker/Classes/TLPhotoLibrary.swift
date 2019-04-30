@@ -91,9 +91,11 @@ class TLPhotoLibrary {
         options.progressHandler = { progress, error, stop, info in
             progressBlock(progress)
         }
-        let requestID = PHCachingImageManager().requestImageData(for: asset, options: options) { (imageData, dataUTI, orientation, info) in
-            if let data = imageData, let _ = info {
-                completionBlock(UIImage(data: data))
+        
+        let requestID = PHCachingImageManager().requestImage(for: asset, targetSize: size, contentMode: .aspectFit, options: options) { image, info in
+            let complete = (info?["PHImageResultIsDegradedKey"] as? Bool) == false
+            if let image = image, complete {
+                completionBlock(image)
             } else {
                 completionBlock(nil) // error
             }
