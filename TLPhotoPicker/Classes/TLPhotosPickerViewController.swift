@@ -85,7 +85,9 @@ public struct TLPhotosPickerConfigure {
     public var groupByFetch: PHFetchedResultGroupedBy?
     
     // Lawrence added
-    public var activeCamera: Bool = false
+    public var inverted: Bool = false
+    public var popArrowImage = TLBundle.podBundleImage(named: "pop_arrow")
+    public var subTitleArrowImage = TLBundle.podBundleImage(named: "arrow")
     public init() {}
 }
 
@@ -163,9 +165,6 @@ open class TLPhotosPickerViewController: UIViewController {
     private var placeholderThumbnail: UIImage?
     private var cameraImage: UIImage?
     
-    // Lawrence added
-    private var cameraActivedOnce: Bool = false
-    
     deinit {
         //print("deinit TLPhotosPickerViewController")
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
@@ -226,10 +225,6 @@ open class TLPhotosPickerViewController: UIViewController {
         super.viewDidLoad()
         makeUI()
         checkAuthorization()
-        if configure.activeCamera, !cameraActivedOnce {
-            showCameraIfAuthorized()
-        }
-        cameraActivedOnce = true
     }
     
     override open func viewDidLayoutSubviews() {
@@ -316,8 +311,8 @@ extension TLPhotosPickerViewController {
         self.emptyMessageLabel.text = self.configure.emptyMessage
         self.albumPopView.tableView.delegate = self
         self.albumPopView.tableView.dataSource = self
-        self.popArrowImageView.image = TLBundle.podBundleImage(named: "pop_arrow")
-        self.subTitleArrowImageView.image = TLBundle.podBundleImage(named: "arrow")
+        self.popArrowImageView.image = self.configure.popArrowImage
+        self.subTitleArrowImageView.image = self.configure.subTitleArrowImage
         if #available(iOS 10.0, *), self.usedPrefetch {
             self.collectionView.isPrefetchingEnabled = true
             self.collectionView.prefetchDataSource = self
@@ -327,6 +322,11 @@ extension TLPhotosPickerViewController {
         if #available(iOS 9.0, *), self.allowedLivePhotos {
         } else {
             self.allowedLivePhotos = false
+        }
+        if self.configure.inverted {
+            self.collectionView.transform = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: 0)
+        } else {
+            collectionView.transform = .identity
         }
         self.customDataSouces?.registerSupplementView(collectionView: self.collectionView)
     }
@@ -532,9 +532,6 @@ extension TLPhotosPickerViewController: UIImagePickerControllerDelegate, UINavig
         }
         picker.allowsEditing = false
         picker.delegate = self
-        if cameraActivedOnce {
-            picker.modalPresentationStyle = .overCurrentContext
-        }
         present(picker, animated: true, completion: nil)
     }
 
@@ -1017,6 +1014,13 @@ extension TLPhotosPickerViewController: UICollectionViewDelegateFlowLayout {
         if let section = self.focusedCollection?.sections?[safe: indexPath.section] {
             self.customDataSouces?.configure(supplement: reuseView, section: section)
         }
+        
+        if configure.inverted {
+            reuseView.transform = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: 0)
+        } else {
+            reuseView.transform = .identity
+        }
+        
         return reuseView
     }
     

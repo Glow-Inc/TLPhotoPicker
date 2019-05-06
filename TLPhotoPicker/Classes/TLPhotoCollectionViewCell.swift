@@ -51,6 +51,11 @@ open class TLPhotoCollectionViewCell: UICollectionViewCell {
             self.selectedView?.layer.borderColor = self.configure.selectedColor.cgColor
             self.orderBgView?.backgroundColor = self.configure.selectedColor
             self.videoIconImageView?.image = self.configure.videoIcon
+            if self.configure.inverted {
+                self.transform = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: 0)
+            } else {
+                transform = .identity
+            }
         }
     }
     
@@ -112,10 +117,20 @@ open class TLPhotoCollectionViewCell: UICollectionViewCell {
     
     @objc open func popScaleAnim() {
         UIView.animate(withDuration: 0.1, animations: {
-            self.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+            if self.configure.inverted {
+                let transform = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: 0)
+                self.transform = transform.scaledBy(x: 1.05, y: 1.05)
+            } else {
+                self.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
+            }
         }, completion: { _ in
             UIView.animate(withDuration: 0.1, animations: {
-                self.transform = CGAffineTransform(scaleX: 1, y: 1)
+                if self.configure.inverted {
+                    let transform = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: 0)
+                    self.transform = transform.scaledBy(x: 1, y: 1)
+                } else {
+                    self.transform = CGAffineTransform(scaleX: 1, y: 1)
+                }
             })
         })
     }
@@ -158,7 +173,7 @@ open class TLPhotoCollectionViewCell: UICollectionViewCell {
         self.selectedView?.isHidden = true
         self.selectedView?.layer.borderWidth = 10
         self.selectedView?.layer.cornerRadius = 15
-        self.orderBgView?.layer.cornerRadius = 2
+        self.orderBgView?.layer.cornerRadius = 8
         self.videoIconImageView?.image = self.configure.videoIcon
         if #available(iOS 11.0, *) {
             self.imageView?.accessibilityIgnoresInvertColors = true

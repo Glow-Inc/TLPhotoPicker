@@ -110,9 +110,9 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         }
         viewController.customDataSouces = CustomDataSources()
         var configure = TLPhotosPickerConfigure()
-        configure.numberOfColumn = 3
+        configure.inverted = true
+        configure.numberOfColumn = 4
         configure.groupByFetch = .day
-        configure.activeCamera = false
         viewController.configure = configure
         viewController.selectedAssets = self.selectedAssets
         viewController.logDelegate = self
