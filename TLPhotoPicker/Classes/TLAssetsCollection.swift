@@ -164,6 +164,11 @@ public struct TLPHAsset {
                 writeURL?.appendPathComponent("\(fileName2).jpg")
             }
         }
+        if phAsset.mediaType == .video {
+            let uuid = UUID().uuidString
+            writeURL?.deleteLastPathComponent()
+            writeURL?.appendPathComponent("\(uuid).mp4")
+        }
         guard let localURL = writeURL, let mimetype = MIMEType(writeURL) else { return nil }
         switch phAsset.mediaType {
         case .video:
@@ -181,7 +186,7 @@ public struct TLPHAsset {
             }
             return PHImageManager.default().requestExportSession(forVideo: phAsset, options: requestOptions, exportPreset: exportPreset) { (session, infoDict) in
                 session?.outputURL = localURL
-                session?.outputFileType = AVFileType.mov
+                session?.outputFileType = AVFileType.mp4
                 session?.exportAsynchronously(completionHandler: {
                     DispatchQueue.main.async {
                         completionBlock(localURL, mimetype)
@@ -226,7 +231,8 @@ public struct TLPHAsset {
         guard let phAsset = self.phAsset, phAsset.mediaType == .video else { return }
         var type = PHAssetResourceType.video
         guard let resource = (PHAssetResource.assetResources(for: phAsset).filter{ $0.type == type }).first else { return }
-        let fileName = resource.originalFilename
+        let uuid = UUID().uuidString
+        let fileName = "\(uuid).mp4"
         var writeURL: URL?
         if #available(iOS 10.0, *) {
             writeURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(fileName)")
@@ -248,7 +254,7 @@ public struct TLPHAsset {
             guard let avasset = avasset else { return }
             let exportSession = AVAssetExportSession.init(asset: avasset, presetName: AVAssetExportPresetHighestQuality)
             exportSession?.outputURL = localURL
-            exportSession?.outputFileType = AVFileType.mov
+            exportSession?.outputFileType = AVFileType.mp4
             exportSession?.exportAsynchronously(completionHandler: {
                 completionBlock(localURL, mimetype)
             })
