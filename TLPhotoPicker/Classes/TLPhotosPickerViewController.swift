@@ -199,15 +199,18 @@ open class TLPhotosPickerViewController: UIViewController {
         self.stopPlay()
     }
     
-    func checkAuthorization() {
+    private func checkAuthorization(_ shouldRequestAuth: Bool) {
         switch PHPhotoLibrary.authorizationStatus() {
         case .notDetermined:
-            PHPhotoLibrary.requestAuthorization { [weak self] status in
-                switch status {
-                case .authorized:
-                    self?.initPhotoLibrary()
-                default:
-                    self?.handleDeniedAlbumsAuthorization()
+            if shouldRequestAuth {
+                PHPhotoLibrary.requestAuthorization { [weak self] status in
+                    if Thread.isMainThread {
+                        self?.checkAuthorization(false)
+                    } else {
+                        DispatchQueue.main.async {
+                            self?.checkAuthorization(false)
+                        }
+                    }
                 }
             }
         case .authorized:
@@ -224,7 +227,7 @@ open class TLPhotosPickerViewController: UIViewController {
     override open func viewDidLoad() {
         super.viewDidLoad()
         makeUI()
-        checkAuthorization()
+        checkAuthorization(true)
     }
     
     override open func viewDidLayoutSubviews() {
