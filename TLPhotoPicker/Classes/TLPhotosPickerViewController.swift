@@ -86,8 +86,20 @@ public struct TLPhotosPickerConfigure {
     
     // Lawrence added
     public var inverted: Bool = false
-    public var popArrowImage = TLBundle.podBundleImage(named: "pop_arrow")
-    public var subTitleArrowImage = TLBundle.podBundleImage(named: "arrow")
+    public var popArrowImage: UIImage? = {
+        var popArrow = TLBundle.podBundleImage(named: "pop_arrow")
+        if #available(iOS 13, *) {
+            popArrow = popArrow?.withTintColor(UIColor.secondarySystemBackground)
+        }
+        return popArrow
+    }()
+    public var subTitleArrowImage: UIImage? = {
+        var subTitleArrow = TLBundle.podBundleImage(named: "arrow")
+        if #available(iOS 13, *) {
+            subTitleArrow = subTitleArrow?.withTintColor(UIColor.label)
+        }
+        return subTitleArrow
+    }()
     public init() {}
 }
 
